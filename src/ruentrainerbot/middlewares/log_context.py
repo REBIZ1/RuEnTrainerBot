@@ -16,9 +16,9 @@ class LogContextMiddleware(BaseMiddleware):
             data: Dict[str, Any],
     ) -> Any:
         ctx: Dict[str, Any] = {}
-        update: Optional[Update] = data.get('event_update')
-        from_user = getattr(event, 'from_user', None)
-        chat = getattr(event, 'chat', None)
+        update = data.get('update')
+        from_user = data.get('event_from_user')
+        chat = data.get('event_chat')
         if update is not None:
             ctx['update_id'] = update.update_id
         if from_user is not None:
