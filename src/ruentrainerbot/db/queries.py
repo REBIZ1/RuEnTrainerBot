@@ -1,6 +1,7 @@
 import sqlalchemy as sq
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from ruentrainerbot.db.models import Base, Dictionary, Users, UserWords
+from sqlalchemy.dialects.postgresql import insert
 
 
 async def create_tables(engine: AsyncEngine) -> None:
@@ -77,19 +78,20 @@ async def add_word_to_user(
     - иначе создает новую.
     """
     await session.execute(
-        sq.insert(Users)
+        insert(Users.__table__)
         .values(id=user_id)
-        .on_conflict_do_nothing(index_elements=[Users.id])
+        .on_conflict_do_nothing(index_elements=['id'])
     )
 
-    await session.execute(
-        sq.insert(UserWords)
+    stmt = (
+        insert(UserWords.__table__)
         .values(user_id=user_id, word_id=word_id, is_active=True)
         .on_conflict_do_update(
-            index_elements=[UserWords.user_id, UserWords.word_id],
+            index_elements=['user_id', 'word_id'],
             set_={'is_active': True},
         )
     )
+    await session.execute(stmt)
     await session.commit()
 
 async def remove_word_from_user(
@@ -133,4 +135,24 @@ async def get_user_active_words(
         stmt = stmt.limit(limit)
     result = await session.execute(stmt)
     return list(result.scalars().all())
+
+async def is_word_active_for_user(
+    session: AsyncSession,
+    user_id: int,
+    word_id: int,
+) -> bool:
+    """
+    Проверяет добавлено ли слово в активный личный словарь пользователя
+    """
+    stmt = (
+        sq.select(UserWords.word_id)
+        .where(
+            UserWords.user_id == user_id,
+            UserWords.word_id == word_id,
+            UserWords.is_active == True,
+        )
+        .limit(1)
+    )
+    res = await session.execute(stmt)
+    return res.scalar_one_or_none() is not None
 
