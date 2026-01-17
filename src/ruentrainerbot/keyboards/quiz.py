@@ -16,7 +16,7 @@ def quiz_options_kb(
         kb.button(text='✅ Добавлен', callback_data='quiz:noop')
         kb.button(text='➖ Удалить', callback_data=f'quiz:rm:{word_id}')
     else:
-        kb.button(text='➕ Добавить', caYllback_data=f'quiz:add:{word_id}')
+        kb.button(text='➕ Добавить', callback_data=f'quiz:add:{word_id}')
     kb.button(text='Завершить квиз', callback_data='quiz:stop')
     kb.adjust(2)
     return kb.as_markup()
