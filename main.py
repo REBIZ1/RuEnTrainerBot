@@ -3,7 +3,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from ruentrainerbot.core.config import settings
 from ruentrainerbot.core.logging import configure_logging, get_logger
-from ruentrainerbot.db.queries import create_tables
+from ruentrainerbot.db.queries import create_fill_tables
 from ruentrainerbot.db.session import engine
 from ruentrainerbot.middlewares.log_context import LogContextMiddleware
 from ruentrainerbot.handlers import routers
@@ -18,7 +18,7 @@ async def main():
     )
     logger.info('Бот запущен', debug=settings.debug)
     if settings.debug:
-        await create_tables(engine)
+        await create_fill_tables(engine)
         logger.info('tables_created')
 
     bot = Bot(token=settings.token)
